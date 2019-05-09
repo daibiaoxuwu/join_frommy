@@ -25,7 +25,7 @@ const int SUCCESS = 0;
 const int FAILURE = 1;
 
 class SimJoiner {
-    Trie jacTrie, edTrie;
+    // Trie jacTrie, edTrie;
 	//count number of word in each line
 	int* word_count;
 	int* char_count;
