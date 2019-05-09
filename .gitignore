@@ -1,2 +1,6 @@
 
 \.vscode
+*.o
+*.un~
+Makefile.win
+*.zip

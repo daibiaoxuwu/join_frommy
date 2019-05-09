@@ -44,10 +44,10 @@ class SimJoiner {
 	int line_count;
 
 	int calculate_ED(const char *query, char* line, int threshold);
-    int searchED(char *query, int id2, Trie edTrie, unsigned threshold, vector<EDJoinResult> &result);
-    int createEDIndex(const char *filename, int q, Trie edTrie);
-    int searchJaccard(char *query_split, int id2, Trie jacTrie, double threshold, vector<JaccardJoinResult> &result);
-    int createJaccIndex(const char *filename, Trie jacTrie);
+    int searchED(char *query, int id2, Trie* edTrie, unsigned threshold, vector<EDJoinResult> &result);
+    int createEDIndex(const char *filename, int q, Trie* edTrie);
+    int searchJaccard(char *query_split, int id2, Trie* jacTrie, double threshold, vector<JaccardJoinResult> &result);
+    int createJaccIndex(const char *filename, Trie* jacTrie);
 
 public:
     SimJoiner();

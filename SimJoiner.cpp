@@ -51,7 +51,7 @@ SimJoiner::~SimJoiner() {
 }
 
     
-int SimJoiner::createJaccIndex(const char *filename, Trie jacTrie){
+int SimJoiner::createJaccIndex(const char *filename, Trie* jacTrie){
 
 	char buf[1024];
 	FILE* file = fopen(filename,"r");
@@ -76,7 +76,7 @@ int SimJoiner::createJaccIndex(const char *filename, Trie jacTrie){
 		while (pch != nullptr)
 		{
 			//if is unique
-		   	if(jacTrie.insert_multiple_unique(line_count, pch, strlen(pch)))
+		   	if(jacTrie->insert_multiple_unique(line_count, pch, strlen(pch)))
 		   		++word_count[line_count];
 			pch = strtok (nullptr, " \r\n");
 		}
@@ -84,7 +84,7 @@ int SimJoiner::createJaccIndex(const char *filename, Trie jacTrie){
     return SUCCESS;
 }
 
-int SimJoiner::searchJaccard(char *query_split, int id2, Trie jacTrie, double threshold, vector<JaccardJoinResult> &result)
+int SimJoiner::searchJaccard(char *query_split, int id2, Trie* jacTrie, double threshold, vector<JaccardJoinResult> &result)
 {
 	result.clear();
 
@@ -109,7 +109,7 @@ int SimJoiner::searchJaccard(char *query_split, int id2, Trie jacTrie, double th
 			//count number of words
 			++query_count;
 			//search for this word in jacTrie
-			TrieNode* search_result = jacTrie.search(pch, strlen(pch));
+			TrieNode* search_result = jacTrie->search(pch, strlen(pch));
 			if(search_result != nullptr){
 			    //find a same word. add 1 to all lines containing this word.
 				for (int it2 : *(search_result->entries)) ++same[it2];
@@ -126,7 +126,6 @@ int SimJoiner::searchJaccard(char *query_split, int id2, Trie jacTrie, double th
             // result.emplace_back(make_pair(i, jaccard));
 	}
 
-
 	return SUCCESS;
 }
 
@@ -134,7 +133,7 @@ int SimJoiner::searchJaccard(char *query_split, int id2, Trie jacTrie, double th
 
 int SimJoiner::joinJaccard(const char *filename1, const char *filename2, double threshold, vector<JaccardJoinResult> &result) {
     result.clear();
-    Trie jacTrie;
+    Trie* jacTrie = new Trie();
     createJaccIndex(filename1, jacTrie);
 
     char buf[1024];
@@ -151,12 +150,13 @@ int SimJoiner::joinJaccard(const char *filename1, const char *filename2, double 
     sort(result.begin(), result.end());//TODO: need unique?
     result.resize(unique(result.begin(), result.end()) - result.begin());
 
+    delete jacTrie;
     return SUCCESS;
 }
 
 
     
-int SimJoiner::createEDIndex(const char *filename, int q, Trie edTrie){
+int SimJoiner::createEDIndex(const char *filename, int q, Trie* edTrie){
 
 	char buf[1024];
 	FILE* file = fopen(filename,"r");
@@ -173,7 +173,7 @@ int SimJoiner::createEDIndex(const char *filename, int q, Trie edTrie){
 		//ED: insert adjacent q words into edTrie
 		this->q=q;
 		for(int j = 0; buf[j+q-1]!='\0'; ++j){
-			edTrie.insert_multiple_unique(line_count, buf + j, q);
+			edTrie->insert_multiple_unique(line_count, buf + j, q);
 		}
 
 		//jaccard: split by spaces and insert into jacTrie
@@ -190,7 +190,7 @@ int SimJoiner::createEDIndex(const char *filename, int q, Trie edTrie){
 }
 
 
-int SimJoiner::searchED(char *query, int id2, Trie edTrie, unsigned threshold, vector<EDJoinResult> &result)
+int SimJoiner::searchED(char *query, int id2, Trie* edTrie, unsigned threshold, vector<EDJoinResult> &result)
 {
 
 	result.clear();
@@ -228,7 +228,7 @@ int SimJoiner::searchED(char *query, int id2, Trie edTrie, unsigned threshold, v
 			//at the third, fourth,... appearance first_occurance will always remain i.
 
 			//search for this word in jacTrie
-			TrieNode *search_result = edTrie.search(pch, q);
+			TrieNode *search_result = edTrie->search(pch, q);
 			std::vector<int> *word_inverse_set = nullptr;
 			std::vector<int> *word_inverse_set_freq = nullptr;
 			if(search_result != nullptr) {
@@ -345,7 +345,7 @@ int SimJoiner::calculate_ED(const char *query, char *line, int threshold){
 
 int SimJoiner::joinED(const char *filename1, const char *filename2, unsigned threshold, vector<EDJoinResult> &result) {
     result.clear();
-    Trie edTrie;
+    Trie* edTrie = new Trie();
     createEDIndex(filename1, 3, edTrie);
 
     char buf[1024];
@@ -361,6 +361,7 @@ int SimJoiner::joinED(const char *filename1, const char *filename2, unsigned thr
     //CP
     sort(result.begin(), result.end());//TODO: need unique?
     result.resize(unique(result.begin(), result.end()) - result.begin());
-
+    
+    delete edTrie;
     return SUCCESS;
 }
