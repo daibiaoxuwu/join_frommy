@@ -1,4 +1,8 @@
 #include "SimJoiner.h"
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
 
 using namespace std;
 inline int my_abs(int a) { return a > 0 ? a : -a; }
@@ -47,7 +51,7 @@ SimJoiner::~SimJoiner() {
 }
 
     
-int SimSearcher::createJaccIndex(const char *filename, Trie jacTrie){
+int SimJoiner::createJaccIndex(const char *filename, Trie jacTrie){
 
 	char buf[1024];
 	FILE* file = fopen(filename,"r");
@@ -80,12 +84,12 @@ int SimSearcher::createJaccIndex(const char *filename, Trie jacTrie){
     return SUCCESS;
 }
 
-int SimSearcher::searchJaccard(char *query_split, int id2, Trie jacTrie, double threshold, vector<JaccardJoinResult> &result)
+int SimJoiner::searchJaccard(char *query_split, int id2, Trie jacTrie, double threshold, vector<JaccardJoinResult> &result)
 {
 	result.clear();
 
 	//copy query into query_split to avoid modifying it in 'strtok'
-	memcpy(query_split,query,strlen(query)+1);
+	//memcpy(query_split,query,strlen(query)+1);
 	int query_count = 0;
 
 	//split query into words; then find them in jacTrie
@@ -134,7 +138,7 @@ int SimJoiner::joinJaccard(const char *filename1, const char *filename2, double 
     createJaccIndex(filename1, jacTrie);
 
     char buf[1024];
-	FILE* file = fopen(filename,"r");
+	FILE* file = fopen(filename2,"r");
 	for(line_count=0;fgets(buf,1024,file);++line_count){
 
 		//remove tail \n
@@ -152,7 +156,7 @@ int SimJoiner::joinJaccard(const char *filename1, const char *filename2, double 
 
 
     
-int SimSearcher::createEDIndex(const char *filename, int q, Trie edTrie){
+int SimJoiner::createEDIndex(const char *filename, int q, Trie edTrie){
 
 	char buf[1024];
 	FILE* file = fopen(filename,"r");
@@ -186,7 +190,7 @@ int SimSearcher::createEDIndex(const char *filename, int q, Trie edTrie){
 }
 
 
-int SimSearcher::searchED(char *query, int id2, Trie edTrie, unsigned threshold, vector<EDJoinResult> &result)
+int SimJoiner::searchED(char *query, int id2, Trie edTrie, unsigned threshold, vector<EDJoinResult> &result)
 {
 
 	result.clear();
@@ -286,7 +290,7 @@ int SimSearcher::searchED(char *query, int id2, Trie edTrie, unsigned threshold,
 
 
 
-int SimSearcher::calculate_ED(const char *query, char *line, int threshold){
+int SimJoiner::calculate_ED(const char *query, char *line, int threshold){
 	const int query_len = (int)strlen(query);
 	const int line_len = (int)strlen(line);
 	int data[query_len+1][line_len+1];
@@ -345,7 +349,7 @@ int SimJoiner::joinED(const char *filename1, const char *filename2, unsigned thr
     createEDIndex(filename1, 3, edTrie);
 
     char buf[1024];
-	FILE* file = fopen(filename,"r");
+	FILE* file = fopen(filename2,"r");
 	for(line_count=0;fgets(buf,1024,file);++line_count){
 
 		//remove tail \n
